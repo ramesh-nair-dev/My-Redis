@@ -2,7 +2,6 @@ package com.example.miniredis.controller;
 
 import com.example.miniredis.dtos.CacheRequest;
 import com.example.miniredis.dtos.CacheResponse;
-import com.example.miniredis.dtos.CacheStats;
 import com.example.miniredis.service.CacheService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,23 +12,23 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/cache")
-public class CacheController<T>{
-    private final CacheService<T> cacheService;
+public class CacheController<V> {
 
-    public CacheController(CacheService<T> cacheService) {
+    private final CacheService<String, V> cacheService;
+
+    public CacheController(CacheService<String, V> cacheService) {
         this.cacheService = cacheService;
     }
 
     @PostMapping
-    public ResponseEntity<String> set(@RequestBody CacheRequest<T> request) {
+    public ResponseEntity<String> set(@RequestBody CacheRequest<String, V> request) {
         cacheService.set(request.getKey(), request.getValue(), request.getTtl());
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body("Key set successfully: " + request.getKey());
+        return ResponseEntity.status(HttpStatus.CREATED).body("Key set successfully: " + request.getKey());
     }
 
     @GetMapping("/{key}")
-    public ResponseEntity<CacheResponse<T>> get(@PathVariable String key) {
-        T value = cacheService.get(key);
+    public ResponseEntity<CacheResponse<String, V>> get(@PathVariable String key) {
+        V value = cacheService.get(key);
         if (value == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(new CacheResponse<>(key, value));
     }
@@ -46,10 +45,7 @@ public class CacheController<T>{
     }
 
     @GetMapping("/stats")
-    public ResponseEntity<CacheStats> stats() {
-        Map<String , Object> statsMap = cacheService.getStats();
-        CacheStats response = CacheStats.toCacheStats(statsMap);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<Map<String, Object>> stats() {
+        return ResponseEntity.ok(cacheService.getStats());
     }
-
 }

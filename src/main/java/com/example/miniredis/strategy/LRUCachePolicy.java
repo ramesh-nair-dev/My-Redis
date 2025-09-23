@@ -1,26 +1,44 @@
 package com.example.miniredis.strategy;
 
-import com.example.miniredis.models.Node;
-import com.example.miniredis.store.CacheStore;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import java.util.logging.Logger;
+public class LRUCachePolicy<K> implements EvictionPolicy<K> {
 
-/**
- * LRU eviction policy.
- * - Removes the least recently used node from CacheStore.
- * - Updates eviction counter atomically.
- */
-public class LRUCachePolicy<T> implements EvictionPolicy<T> {
-
-    private static final Logger LOGGER = Logger.getLogger(LRUCachePolicy.class.getName());
+    // LinkedHashMap with accessOrder=true moves accessed keys to end
+    private final Map<K, Boolean> order = new LinkedHashMap<>(16, 0.75f, true);
 
     @Override
-    public void evict(CacheStore<T> cacheStore) {
-        Node<T> lruNode = cacheStore.getTail(); // least recently used
-        if (lruNode != null && lruNode.getKey() != null) {
-            cacheStore.delete(lruNode.getKey()); // remove node from list & map
-            cacheStore.incrementEvictionCounter(); // accurate eviction count
-            LOGGER.info("Evicted LRU key: " + lruNode.getKey());
+    public synchronized void keyAdded(K key) {
+        order.put(key, Boolean.TRUE);
+    }
+
+    @Override
+    public synchronized void keyAccessed(K key) {
+        // with accessOrder=true, a read through map will reorder;
+        // ensure the map sees this access by doing get/put if necessary
+        if (order.containsKey(key)) {
+            // re-put to update order (cheap)
+            order.remove(key);
+            order.put(key, Boolean.TRUE);
         }
+    }
+
+    @Override
+    public synchronized void keyRemoved(K key) {
+        order.remove(key);
+    }
+
+    @Override
+    public synchronized K evictKey() {
+        if (order.isEmpty()) return null;
+        K oldest = order.keySet().iterator().next();
+        order.remove(oldest);
+        return oldest;
+    }
+
+    @Override
+    public String name() {
+        return "LRU";
     }
 }

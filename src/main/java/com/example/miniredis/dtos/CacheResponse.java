@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class CacheResponse<T> {
-    private String key;
-    private T value;
+public class CacheResponse<K, V> {
+    private K key;
+    private V value;
 }

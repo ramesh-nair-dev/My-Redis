@@ -1,4 +1,4 @@
-package com.example.miniredis.service;
-
-public class CacheServiceTest {
-}
+//package com.example.miniredis.service;
+//
+//public class CacheServiceTest {
+//}

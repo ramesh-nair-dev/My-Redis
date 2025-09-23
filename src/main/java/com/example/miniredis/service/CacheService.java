@@ -1,43 +1,50 @@
 package com.example.miniredis.service;
+
 import com.example.miniredis.store.CacheStore;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 @Service
-public class CacheService<T> {
+public class CacheService<K, V> {
 
-    private final CacheStore<T> cacheStore;
+    private static final Logger logger = Logger.getLogger(CacheService.class.getName());
 
-    public CacheService(CacheStore<T> cacheStore) {
+    private final CacheStore<K, V> cacheStore;
+
+    // constructor injection (CacheStore bean provided via configuration)
+    public CacheService(CacheStore<K, V> cacheStore) {
         this.cacheStore = cacheStore;
     }
 
-    public void set(String key, T value, long ttl) {
-        cacheStore.set(key, value, ttl);
+    public void set(K key, V value, long ttlMillis) {
+        if (key == null) throw new IllegalArgumentException("key cannot be null");
+        if (ttlMillis < 0) throw new IllegalArgumentException("ttlMillis cannot be negative");
+        cacheStore.set(key, value, ttlMillis);
+        logger.fine(() -> "Service: set key=" + key);
     }
 
-    public T get(String key) {
+    public V get(K key) {
+        if (key == null) return null;
         return cacheStore.get(key);
     }
 
-    public void delete(String key) {
+    public void delete(K key) {
+        if (key == null) return;
         cacheStore.delete(key);
     }
 
-    public Set<String> listKeys() {
-        return cacheStore.getSnapshot().keySet();
+    public Set<K> listKeys() {
+        return cacheStore.listKeys();
     }
 
     public Map<String, Object> getStats() {
         return Map.of(
                 "maxCapacity", cacheStore.getMaxCapacity(),
-                "currentSize", cacheStore.getSnapshot().size(),
-                "hits", cacheStore.getHits(),
-                "misses", cacheStore.getMisses(),
-                "evictions", cacheStore.getEvictions()
+                "currentSize", cacheStore.getCache().size(),
+                "evictionPolicy", cacheStore.getEvictionPolicy().name()
         );
     }
 }

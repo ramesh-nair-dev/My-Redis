@@ -1,10 +1,14 @@
 package com.example.miniredis.dtos;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class CacheRequest<T> {
-    private String key;
-    private T value;
-    private long ttl; // optional, default 0 = infinite
+@NoArgsConstructor
+@AllArgsConstructor
+public class CacheRequest<K, V> {
+    private K key;
+    private V value;
+    private long ttl; // in milliseconds
 }
