@@ -1,6 +1,6 @@
 # 🚀 My-Redis – A Lightweight, Redis-Inspired In-Memory Data Store
 
-## ⚡ Elevator Pitch (TL;DR)
+##  Intro
 
 *This project is a Redis-inspired in-memory key-value store, built from scratch using Java & Spring Boot.*
 It explores **system-level engineering concepts** like concurrency, eviction policies, persistence, and design trade-offs.
