@@ -25,6 +25,8 @@ class CacheFullIntegrationTest {
         // Simulated persistence
         persistenceManager = new InMemoryPersistenceManager<>();
 
+
+
         // LRU cache with max capacity 3 and persistence
         CacheStore<String, String> lruStore = new CacheStore<>(3, new LRUCachePolicy<>(), persistenceManager);
         lruCacheService = new CacheService<>(lruStore);

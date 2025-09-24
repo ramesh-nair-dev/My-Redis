@@ -28,6 +28,7 @@ public class CacheIntegrationTest {
         persistenceManager = Mockito.mock(PersistenceManager.class);
         Mockito.when(persistenceManager.load()).thenReturn(new ConcurrentHashMap<>());
 
+
         // Create cache with maxCapacity=3, LRU policy
         CacheStore<String, String> store = new CacheStore<>(
                 3,
